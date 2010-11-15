@@ -19,7 +19,8 @@
 
 var _canvas, _c, _scr, _mouse, _ball;
 
-var _step = 100;
+var _step = 1;
+var _clipMargin = 5;
 var _time;
 
 function size() {
@@ -41,25 +42,46 @@ function mmove(event) {
 	y: event.clientY};
 }
 
-function draw() {
-    _c.fillStyle = $(".bg").css("color");
-    _c.fillRect(0, 0, _scr.w, _scr.h);
-    var dTime = new Date().getTime() - _time;
-    _ball.v.x += _ball.a.x * dTime / 1000;
-    _ball.v.y += _ball.a.y * dTime / 1000;
-    if(_ball.y + _ball.r + _ball.v.y * dTime / 1000 > _scr.h) {
-	_ball.v.y = - _ball.v.y * 0.5;
+function clip() {
+   _c.clearRect(_ball.x - _ball.r - _clipMargin, _ball.y - _ball.r - _clipMargin,		2 * (_ball.r + _clipMargin), 2 * (_ball.r + _clipMargin));
+}
+
+function move(dTime) {
+    _ball.v.x += (_ball.a.x * dTime) / 1000;
+    _ball.v.y += (_ball.a.y * dTime) / 1000;
+    next = {
+	x: _ball.x + (_ball.v.x * dTime) / 1000,
+	y: _ball.y + (_ball.v.y * dTime) / 1000
+    };
+    if(next.x + _ball.r > _scr.w) {
+	_ball.x = 2 * _scr.w - 2 * _ball.r - next.x;
+	_ball.v.x *= -1;
+    } else if(next.x - _ball.r < 0) {
+	_ball.x = 2 * _ball.r - next.x;
+	_ball.v.x *= -1;
+    } else {
+	_ball.x = next.x;
     }
-    _ball.x += _ball.v.x * dTime / 1000;
-    _ball.y += _ball.v.y * dTime / 1000;
+    if(next.y + _ball.r > _scr.h) {
+	_ball.y = 2 * _scr.h - 2 * _ball.r - next.y;
+	_ball.v.y *= -1;
+    } else {
+	_ball.y = next.y;
+    }
+}
 
-    _c.fillStyle = $(".ball").css("color");
+function renderBall() {
     _c.beginPath();
-    _c.arc(_ball.x, _ball.y, _ball.r, 0, 360);
+    _c.arc(_ball.x, _ball.y, _ball.r, 0, 2 * Math.PI);
     _c.fill();
+}
 
+function draw() {
+    clip();
+    move(new Date().getTime() - _time);
+    renderBall();
     _time = new Date().getTime();
-    setInterval(draw, _step);
+    setTimeout(draw, _step);
 }
 
 $(window).load(function() {
@@ -67,7 +89,7 @@ $(window).load(function() {
 //  eventSource.mousedown(mdown);
     eventSource.mousemove(mmove);
 //  eventSource.mouseup(mup);
-    eventSource.mouseout(mout);
+//    eventSource.mouseout(mout);
     $(window).resize(resize);
     _canvas = $('#canvas')[0];
     _c = _canvas.getContext('2d');
@@ -84,6 +106,7 @@ $(window).load(function() {
 	    x: 0,
 	    y: 980} // pix.s^-2
     };
+    _c.fillStyle =  $(".ball").css("color");
     _time = new Date().getTime();
-    setInterval(draw, _step);
+    setTimeout(draw, _step);
 });
