@@ -1,0 +1,13 @@
+body {
+   padding: 0;
+   margin: 0;
+   overflow: hidden;
+}
+
+.bg {
+   color: #222;
+}
+
+.ball {
+   color: #222229;
+}
