@@ -26,7 +26,8 @@ var _time;
 function size() {
     _scr = {
 	h: _canvas.height = window.innerHeight,
-	w: _canvas.width = window.innerWidth};
+	w: _canvas.width = window.innerWidth
+    };
 }
 
 function resize() {
@@ -49,22 +50,32 @@ function clip() {
 function move(dTime) {
     _ball.v.x += (_ball.a.x * dTime) / 1000;
     _ball.v.y += (_ball.a.y * dTime) / 1000;
+//    _ball.v.x *= 0.999;
+//    _ball.v.y *= 0.999;
     next = {
 	x: _ball.x + (_ball.v.x * dTime) / 1000,
 	y: _ball.y + (_ball.v.y * dTime) / 1000
     };
+    if(next.y + _ball.r > _mouse.y &&
+       _ball.y + _ball.r < _mouse.y &&
+       next.x - _ball.r < _mouse.x && 
+       next.x + _ball.r > _mouse.x) {
+	_ball.v.x += (next.x - _mouse.x) * 20 + Math.random() * 5;
+	_ball.v.y *= -1;
+    }
+
     if(next.x + _ball.r > _scr.w) {
 	_ball.x = 2 * _scr.w - 2 * _ball.r - next.x;
-	_ball.v.x *= -1;
+	_ball.v.x *= -0.75;
     } else if(next.x - _ball.r < 0) {
 	_ball.x = 2 * _ball.r - next.x;
-	_ball.v.x *= -1;
+	_ball.v.x *= -0.75;
     } else {
 	_ball.x = next.x;
     }
     if(next.y + _ball.r > _scr.h) {
 	_ball.y = 2 * _scr.h - 2 * _ball.r - next.y;
-	_ball.v.y *= -1;
+	_ball.v.y *= -0.75;
     } else {
 	_ball.y = next.y;
     }
@@ -96,8 +107,8 @@ $(window).load(function() {
     size();
     _ball = {
 	x: _scr.w/2,
-	y: _scr.h/2,
-	r: 25,
+	y: _scr.h/8,
+	r: 50,
 	m: 50,
 	v: {
 	    x: 0,   // pix.s^-1
@@ -105,6 +116,10 @@ $(window).load(function() {
 	a: {
 	    x: 0,
 	    y: 980} // pix.s^-2
+    };
+    _mouse = {
+	x: 0,
+	y: 0,
     };
     _c.fillStyle =  $(".ball").css("color");
     _time = new Date().getTime();
